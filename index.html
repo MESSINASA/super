@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cool Calendar</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('R-C.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 20px 0;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .calendar {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 350px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: rgba(30, 144, 255, 0.6);
+            color: white;
+        }
+        .calendar-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .calendar-header button:hover {
+            transform: scale(1.2);
+        }
+        .calendar-body {
+            padding: 20px;
+            transition: opacity 0.5s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .days-of-week {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .days-of-week div {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: rgba(30, 144, 255, 0.9);
+        }
+        .days {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .day {
+            width: 40px;
+            height: 70px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 2px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .day:hover {
+            background-color: rgba(173, 216, 230, 0.6);
+            transform: scale(1.1);
+        }
+        .today {
+            background-color: rgba(30, 144, 255, 0.7);
+            color: white;
+            border-radius: 50%;
+        }
+        .lunar-date {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+        footer {
+            margin-top: 20px;
+            background-color: transparent;
+            color: #555;
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+            font-weight: bold;
+        }
+        footer a {
+            color: #555;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .author {
+            color: #555;
+            cursor: pointer;
+        }
+        .festival {
+            font-size: 10px;
+            color: #ff4500;
+            margin-top: 2px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .calendar-tip {
+            margin-top: 10px;
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 5px;
+            border-radius: 5px;
+            width: 350px;
+            box-sizing: border-box;
+            font-weight: bold;
+        }
+
+        #monthYear {
+            cursor: pointer;
+        }
+
+        #dateInputModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .date-input-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            max-width: 80%;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .date-input-content input {
+            margin: 10px 0;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .date-input-content button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .date-input-content button:hover {
+            background-color: #45a049;
+        }
+
+        .current-time {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: transparent;
+            padding: 20px;
+            border-radius: 10px;
+            width: 500px;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flip {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 80px;
+            line-height: 80px;
+            overflow: hidden;
+            margin: 0 2px;
+            perspective: 1000px;
+        }
+
+        .flip-card {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            background-color: rgba(30, 144, 255, 0.6);
+            color: white;
+            border-radius: 5px;
+        }
+
+        .flip-card.front {
+            z-index: 2;
+            transform: rotateX(0deg);
+        }
+
+        .flip-card.back {
+            transform: rotateX(180deg);
+        }
+
+        .flip.changing .flip-card.front {
+            transform: rotateX(-180deg);
+        }
+
+        .flip.changing .flip-card.back {
+            transform: rotateX(0deg);
+        }
+
+        .colon {
+            display: inline-block;
+            font-size: 48px;
+            vertical-align: top;
+            margin: 0 5px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes flipEffect {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        .flip.changing {
+            animation: flipEffect 0.6s;
+        }
+    </style>
+</head>
+<body style="background-image: url('R-C.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    <div class="current-time" id="currentTime"></div>
+    <div class="calendar" id="calendar">
+        <div class="calendar-header">
+            <button id="prevMonth">&lt;</button>
+            <div id="monthYear"></div>
+            <button id="nextMonth">&gt;</button>
+        </div>
+        <div class="calendar-body" id="calendarBody">
+            <div class="days-of-week">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div class="days" id="days"></div>
+        </div>
+    </div>
+    
+    <div class="calendar-tip">
+        按 > 或 < 键可切换月份
+    </div>
+    
+    <footer>
+        <div>2024.9.25更新 创作者为 <span class="author">来自山东省济南市的一名小学生</span></div>
+    </footer>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modalText"></p>
+        </div>
+    </div>
+
+    <div id="dateInputModal" class="modal">
+        <div class="date-input-content">
+            <h2>更改日期</h2>
+            <input type="number" id="yearInput" placeholder="输入年份">
+            <input type="number" id="monthInput" placeholder="输入月份 (1-12)">
+            <button onclick="changeDate()">确定</button>
+        </div>
+    </div>
+
+    <script>
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const monthYear = document.getElementById('monthYear');
+            const daysContainer = document.getElementById('days');
+            daysContainer.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+
+            monthYear.textContent = `${monthNames[month]} ${year}`;
+            monthYear.onclick = showDateInputModal;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('day');
+                daysContainer.appendChild(emptyDiv);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('day');
+                const festival = getFestival(year, month + 1, i);
+                const lunarDate = getLunarDate(year, month + 1, i);
+                dayDiv.innerHTML = `
+                    <div>${i}</div>
+                    <div class="lunar-date">${lunarDate}</div>
+                    ${festival ? `<div class="festival">${festival}</div>` : ''}
+                `;
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+                dayDiv.addEventListener('click', () => showModal(year, month + 1, i, festival, lunarDate));
+                daysContainer.appendChild(dayDiv);
+            }
+        }
+
+        function getLunarDate(year, month, day) {
+            const lunarDays = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十", "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
+            const lunarDay = lunarDays[(day - 1) % 30];
+            return `${lunarDay}`;
+        }
+
+        function getFestival(year, month, day) {
+            const festivals = {
+                '1-1': '元旦',
+                '5-1': '劳动节',
+                '10-1': '国庆节',
+            };
+
+            const solarTerms = {
+                '2-4': '立春', '2-19': '雨水',
+                '3-6': '惊蛰', '3-21': '春分',
+                '4-5': '清明', '4-20': '谷雨',
+                '5-6': '立夏', '5-21': '小满',
+                '6-6': '芒种', '6-21': '夏至',
+                '7-7': '小暑', '7-23': '大暑',
+                '8-8': '立秋', '8-23': '处暑',
+                '9-8': '白露', '9-23': '秋分',
+                '10-8': '寒露', '10-23': '霜降',
+                '11-7': '立冬', '11-22': '小雪',
+                '12-7': '大雪', '12-22': '冬至',
+                '1-6': '小寒', '1-20': '大寒'
+            };
+
+            const key = `${month}-${day}`;
+            return festivals[key] || solarTerms[key] || '';
+        }
+
+        function showModal(year, month, day, festival, lunarDate) {
+            const modal = document.getElementById('myModal');
+            const modalText = document.getElementById('modalText');
+            modalText.innerHTML = `
+                <h2>${year}年${month}月${day}日</h2>
+                <p>农历：${lunarDate}</p>
+                ${festival ? `<p>${festival}</p>` : ''}
+            `;
+            modal.style.display = 'block';
+        }
+
+        function prevMonth() {
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.style.opacity = '0';
+            setTimeout(() => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+                calendarBody.style.opacity = '1';
+            }, 500);
+        }
+
+        function nextMonth() {
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.style.opacity = '0';
+            setTimeout(() => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+                calendarBody.style.opacity = '1';
+            }, 500);
+        }
+
+        function showDateInputModal() {
+            const modal = document.getElementById('dateInputModal');
+            modal.style.display = 'block';
+        }
+
+        function changeDate() {
+            const yearInput = document.getElementById('yearInput');
+            const monthInput = document.getElementById('monthInput');
+            const year = parseInt(yearInput.value);
+            const month = parseInt(monthInput.value) - 1;
+
+            if (isNaN(year) || isNaN(month) || month < 0 || month > 11) {
+                alert('请输入有效的年份和月份');
+                return;
+            }
+
+            currentDate.setFullYear(year);
+            currentDate.setMonth(month);
+            renderCalendar();
+
+            const modal = document.getElementById('dateInputModal');
+            modal.style.display = 'none';
+
+            yearInput.value = '';
+            monthInput.value = '';
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', prevMonth);
+        document.getElementById('nextMonth').addEventListener('click', nextMonth);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === '>' || (event.shiftKey && event.key === '.') || event.key === 'ArrowRight') {
+                event.preventDefault();
+                nextMonth();
+            } else if (event.key === '<' || (event.shiftKey && event.key === ',') || event.key === 'ArrowLeft') {
+                event.preventDefault();
+                prevMonth();
+            }
+        });
+
+        const modal = document.getElementById('myModal');
+        const span = document.getElementsByClassName('close')[0];
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+            const dateInputModal = document.getElementById('dateInputModal');
+            if (event.target == dateInputModal) {
+                dateInputModal.style.display = 'none';
+            }
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+
+            const timeDiv = document.getElementById('currentTime');
+            const newTimeHTML = `
+                <div class="flip">${hours[0]}</div><div class="flip">${hours[1]}</div><span class="colon">:</span>
+                <div class="flip">${minutes[0]}</div><div class="flip">${minutes[1]}</div><span class="colon">:</span>
+                <div class="flip">${seconds[0]}</div><div class="flip">${seconds[1]}</div>
+            `;
+
+            if (timeDiv.innerHTML !== newTimeHTML) {
+                const oldFlips = timeDiv.querySelectorAll('.flip');
+                const newTimeDiv = document.createElement('div');
+                newTimeDiv.innerHTML = newTimeHTML;
+                const newFlips = newTimeDiv.querySelectorAll('.flip');
+
+                for (let i = 0; i < oldFlips.length; i++) {
+                    if (oldFlips[i].textContent !== newFlips[i].textContent) {
+                        newFlips[i].innerHTML = `
+                            <div class="flip-card front">${oldFlips[i].textContent}</div>
+                            <div class="flip-card back">${newFlips[i].textContent}</div>
+                        `;
+                        newFlips[i].classList.add('changing');
+                    } else {
+                        newFlips[i].innerHTML = `<div class="flip-card front">${newFlips[i].textContent}</div>`;
+                    }
+                }
+
+                timeDiv.innerHTML = newTimeDiv.innerHTML;
+
+                setTimeout(() => {
+                    const flips = timeDiv.querySelectorAll('.flip');
+                    flips.forEach(flip => {
+                        flip.classList.remove('changing');
+                        flip.innerHTML = `<div class="flip-card front">${flip.querySelector('.flip-card.back')?.textContent || flip.textContent}</div>`;
+                    });
+                }, 600);
+            }
+        }
+
+        setInterval(updateTime, 1000);
+
+        renderCalendar();
+        updateTime();
+
+        function enableScroll() {
+            window.addEventListener('wheel', handleScroll, { passive: false });
+            window.addEventListener('keydown', handleKeyScroll);
+        }
+
+        function handleScroll(event) {
+            event.preventDefault();
+            window.scrollBy(0, event.deltaY);
+        }
+
+        function handleKeyScroll(event) {
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.preventDefault();
+                const scrollAmount = event.key === 'ArrowUp' ? -50 : 50;
+                window.scrollBy(0, scrollAmount);
+            }
+        }
+
+        window.addEventListener('load', enableScroll);
+    </script>
+</body>
+</html>
